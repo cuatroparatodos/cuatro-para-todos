@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Diccionario de acordes Cuatro venezolano</title>
+    <style>
+        body { font-family: sans-serif; padding: 30px; background: #f0f2f5; }
+        header { text-align: center; color: #666; margin-bottom: 30px; }
+        h1 { font-size: 1.5rem; margin: 0; line-height: 1.2; }
+        .controls { background: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; gap: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 30px; }
+        .card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card h3 { font-size: 1.1rem; margin-bottom: 2px; color: #333; }
+        .diagram-svg { width: 120px; height: 160px; margin: 0 auto; display: block; }
+        .fret-number { font-size: 14px; font-weight: bold; fill: #666; }
+        .single-chord { display: flex; justify-content: center; align-items: center; min-height: 50vh; }
+        .single-chord .card { transform: scale(2); }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Diccionario de acordes<br>Cuatro venezolano<br>Ángel Martínez</h1>
+    </header>
+    <div class="controls">
+        <select id="raizSelect" onchange="renderChords()"><option value="todos">Todas las Notas</option></select>
+        <select id="tipoSelect" onchange="renderChords()"><option value="todos">Todos los Tipos</option></select>
+    </div>
+    <div id="container" class="grid"></div>
+    <script>
+        const chords = [
+            {"raiz": "Do", "tipo": "Mayor", "trastes": [3, 2, 1, 1], "dedos": [3, 2, 1, 1]},
+            {"raiz": "Do", "tipo": "Menor", "trastes": [3, 1, 1, 1], "dedos": [3, 1, 1, 1]},
+            {"raiz": "Do", "tipo": "Séptima", "trastes": [1, 2, 1, 1], "dedos": [1, 2, 1, 1]},
+            {"raiz": "Do", "tipo": "Semidisminuído", "trastes": [1, 1, 0, 1], "dedos": [1, 2, 0, 3]},
+            {"raiz": "Do", "tipo": "Disminuído séptima", "trastes": [0, 1, 0, 1], "dedos": [0, 1, 0, 2]},
+            {"raiz": "Do# / Db", "tipo": "Mayor", "trastes": [4, 3, 2, 2], "dedos": [3, 2, 1, 1]},
+            {"raiz": "Do# / Db", "tipo": "Menor", "trastes": [4, 2, 2, 2], "dedos": [3, 1, 1, 1]},
+            {"raiz": "Do# / Db", "tipo": "Séptima", "trastes": [2, 3, 2, 2], "dedos": [1, 2, 1, 1]},
+            {"raiz": "Do# / Db", "tipo": "Semidisminuído", "trastes": [2, 2, 1, 2], "dedos": [2, 3, 1, 4]},
+            {"raiz": "Do# / Db", "tipo": "Disminuído séptima", "trastes": [1, 2, 1, 2], "dedos": [1, 3, 2, 4]},
+            {"raiz": "Re", "tipo": "Mayor", "trastes": [0, 0, 0, 3], "dedos": [0, 0, 0, 4]},
+            {"raiz": "Re", "tipo": "Menor", "trastes": [0, 3, 3, 3], "dedos": [0, 2, 3, 4]},
+            {"raiz": "Re", "tipo": "Séptima", "trastes": [0, 0, 0, 1], "dedos": [0, 0, 0, 1]},
+            {"raiz": "Re", "tipo": "Semidisminuído", "trastes": [3, 3, 2, 3], "dedos": [2, 3, 1, 4]},
+            {"raiz": "Re", "tipo": "Disminuído séptima", "trastes": [2, 3, 2, 3], "dedos": [1, 3, 2, 4]},
+            {"raiz": "Re# / Eb", "tipo": "Mayor", "trastes": [1, 1, 1, 4], "dedos": [1, 1, 1, 4]},
+            {"raiz": "Re# / Eb", "tipo": "Menor", "trastes": [4, 2, 2, 2], "dedos": [3, 1, 1, 1]},
+            {"raiz": "Re# / Eb", "tipo": "Séptima", "trastes": [1, 1, 1, 2], "dedos": [1, 1, 1, 2]},
+            {"raiz": "Re# / Eb", "tipo": "Semidisminuído", "trastes": [0, 1, 0, 2], "dedos": [0, 1, 0, 3]},
+            {"raiz": "Re# / Eb", "tipo": "Disminuído séptima", "trastes": [0, 1, 0, 1], "dedos": [0, 1, 0, 2]},
+            {"raiz": "Mi", "tipo": "Mayor", "trastes": [2, 2, 2, 0], "dedos": [2, 3, 4, 0]},
+            {"raiz": "Mi", "tipo": "Menor", "trastes": [2, 2, 1, 0], "dedos": [2, 3, 1, 0]},
+            {"raiz": "Mi", "tipo": "Séptima", "trastes": [2, 2, 2, 3], "dedos": [1, 2, 3, 4]},
+            {"raiz": "Mi", "tipo": "Semidisminuído", "trastes": [1, 2, 1, 3], "dedos": [1, 3, 2, 4]},
+            {"raiz": "Mi", "tipo": "Disminuído séptima", "trastes": [1, 2, 1, 2], "dedos": [1, 3, 2, 4]},
+            {"raiz": "Fa", "tipo": "Mayor", "trastes": [0, 3, 3, 1], "dedos": [0, 2, 3, 1]},
+            {"raiz": "Fa", "tipo": "Menor", "trastes": [3, 3, 2, 1], "dedos": [3, 4, 2, 1]},
+            {"raiz": "Fa", "tipo": "Séptima", "trastes": [3, 3, 3, 1], "dedos": [1, 2, 3, 4]},
+            {"raiz": "Fa", "tipo": "Semidisminuído", "trastes": [2, 3, 2, 4], "dedos": [1, 3, 2, 4]},
+            {"raiz": "Fa", "tipo": "Disminuído séptima", "trastes": [2, 3, 2, 3], "dedos": [1, 3, 2, 4]},
+            {"raiz": "Fa# / Gb", "tipo": "Mayor", "trastes": [4, 4, 4, 2], "dedos": [2, 3, 4, 1]},
+            {"raiz": "Fa# / Gb", "tipo": "Menor", "trastes": [0, 4, 3, 2], "dedos": [0, 3, 2, 1]},
+            {"raiz": "Fa# / Gb", "tipo": "Séptima", "trastes": [1, 2, 0, 2], "dedos": [1, 2, 0, 3]},
+            {"raiz": "Fa# / Gb", "tipo": "Semidisminuído", "trastes": [0, 2, 0, 1], "dedos": [0, 2, 0, 1]},
+            {"raiz": "Fa# / Gb", "tipo": "Disminuído séptima", "trastes": [0, 1, 0, 1], "dedos": [0, 1, 0, 2]},
+            {"raiz": "Sol", "tipo": "Mayor", "trastes": [2, 0, 1, 0], "dedos": [2, 0, 1, 0]},
+            {"raiz": "Sol", "tipo": "Menor", "trastes": [1, 0, 1, 3], "dedos": [1, 0, 2, 4]},
+            {"raiz": "Sol", "tipo": "Séptima", "trastes": [2, 3, 1, 3], "dedos": [2, 3, 1, 4]},
+            {"raiz": "Sol", "tipo": "Semidisminuído", "trastes": [1, 3, 1, 2], "dedos": [1, 3, 1, 2]},
+            {"raiz": "Sol", "tipo": "Disminuído séptima", "trastes": [1, 2, 1, 2], "dedos": [1, 3, 2, 4]},
+            {"raiz": "Sol# / Ab", "tipo": "Mayor", "trastes": [3, 1, 2, 1], "dedos": [3, 1, 3, 1]},
+            {"raiz": "Sol# / Ab", "tipo": "Menor", "trastes": [2, 1, 2, 0], "dedos": [2, 1, 2, 0]},
+            {"raiz": "Sol# / Ab", "tipo": "Séptima", "trastes": [3, 4, 2, 4], "dedos": [2, 3, 1, 4]},
+            {"raiz": "Sol# / Ab", "tipo": "Semidisminuído", "trastes": [2, 4, 2, 3], "dedos": [1, 3, 1, 2]},
+            {"raiz": "Sol# / Ab", "tipo": "Disminuído séptima", "trastes": [2, 3, 2, 3], "dedos": [1, 3, 2, 4]},
+            {"raiz": "La", "tipo": "Mayor", "trastes": [0, 2, 3, 2], "dedos": [0, 1, 3, 2]},
+            {"raiz": "La", "tipo": "Menor", "trastes": [0, 2, 3, 1], "dedos": [0, 2, 3, 1]},
+            {"raiz": "La", "tipo": "Séptima", "trastes": [0, 2, 1, 2], "dedos": [0, 2, 1, 3]},
+            {"raiz": "La", "tipo": "Semidisminuído", "trastes": [0, 1, 1, 1], "dedos": [0, 1, 1, 1]},
+            {"raiz": "La", "tipo": "Disminuído séptima", "trastes": [0, 1, 0, 1], "dedos": [0, 1, 0, 2]},
+            {"raiz": "La# / Bb", "tipo": "Mayor", "trastes": [5, 3, 4, 3], "dedos": [3, 1, 2, 1]},
+            {"raiz": "La# / Bb", "tipo": "Menor", "trastes": [4, 3, 4, 2], "dedos": [3, 2, 4, 1]},
+            {"raiz": "La# / Bb", "tipo": "Séptima", "trastes": [1, 3, 2, 3], "dedos": [1, 3, 2, 4]},
+            {"raiz": "La# / Bb", "tipo": "Semidisminuído", "trastes": [1, 2, 2, 2], "dedos": [1, 2, 3, 4]},
+            {"raiz": "La# / Bb", "tipo": "Disminuído séptima", "trastes": [1, 2, 1, 2], "dedos": [1, 3, 2, 4]},
+            {"raiz": "Si", "tipo": "Mayor", "trastes": [2, 1, 0, 0], "dedos": [2, 1, 0, 0]},
+            {"raiz": "Si", "tipo": "Menor", "trastes": [2, 0, 0, 0], "dedos": [2, 0, 0, 0]},
+            {"raiz": "Si", "tipo": "Séptima", "trastes": [0, 1, 0, 0], "dedos": [0, 1, 0, 0]},
+            {"raiz": "Si", "tipo": "Semidisminuído", "trastes": [2, 3, 3, 3], "dedos": [1, 2, 3, 4]},
+            {"raiz": "Si", "tipo": "Disminuído séptima", "trastes": [2, 3, 2, 3], "dedos": [1, 3, 2, 4]}
+        ];
+        function renderChords() {
+            const cont = document.getElementById('container'), rV = document.getElementById('raizSelect').value, tV = document.getElementById('tipoSelect').value;
+            const filt = chords.filter(c => (rV === 'todos' || c.raiz === rV) && (tV === 'todos' || c.tipo === tV));
+            cont.innerHTML = ''; cont.className = (filt.length === 1) ? 'single-chord' : 'grid';
+            filt.forEach(c => {
+                let svg = `<svg viewBox="0 0 120 160" class="diagram-svg">`;
+                if(c.raiz === "Re# / Eb" && c.tipo === "Menor") svg += `<text x="5" y="80" class="fret-number">4</text>`;
+                svg += `<line x1="20" y1="40" x2="100" y2="40" stroke="#333" stroke-width="4"/>`;
+                for(let i=1; i<=5; i++) svg += `<line x1="20" y1="${40+i*20}" x2="100" y2="${40+i*20}" stroke="#333" stroke-width="1"/>`;
+                for(let i=0; i<4; i++) {
+                    let x = 20 + i*26.6;
+                    svg += `<line x1="${x}" y1="40" x2="${x}" y2="140" stroke="#333" stroke-width="1"/>`;
+                    if(c.trastes[i] > 0) {
+                        let y = 40 + (c.trastes[i] * 20) - 10;
+                        svg += `<circle cx="${x}" cy="${y}" r="8" fill="#333"/><text x="${x}" y="${y+4}" fill="white" font-size="8" text-anchor="middle" font-weight="bold">${c.dedos[i]}</text>`;
+                    }
+                }
+                svg += `</svg>`;
+                cont.innerHTML += `<div class="card"><h3>${c.raiz} ${c.tipo}</h3>${svg}</div>`;
+            });
+        }
+        function init() {
+            const rS = document.getElementById('raizSelect'), tS = document.getElementById('tipoSelect');
+            [...new Set(chords.map(c => c.raiz))].forEach(r => rS.innerHTML += `<option value="${r}">${r}</option>`);
+            [...new Set(chords.map(c => c.tipo))].forEach(t => tS.innerHTML += `<option value="${t}">${t}</option>`);
+            renderChords();
+        }
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
